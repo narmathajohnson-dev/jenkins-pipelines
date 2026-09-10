@@ -14,11 +14,10 @@ def call(body) {
             disableConcurrentBuilds()
         }
         
-        agent none
+        agent any
 
         stages {
             stage('Build') {
-                agent { label 'build' }
                 options {
                     skipDefaultCheckout()
                     timeout(time: 30, unit: 'MINUTES')
