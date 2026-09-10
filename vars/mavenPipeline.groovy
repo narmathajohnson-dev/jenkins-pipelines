@@ -16,6 +16,10 @@ def call(body) {
         
         agent any
 
+        tools {
+            maven 'maven-3.9.9' // Requires configuring 'maven3' in Manage Jenkins -> Tools
+        }
+
         stages {
             stage('Build') {
                 options {
