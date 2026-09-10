@@ -14,7 +14,7 @@ def call(body) {
             disableConcurrentBuilds()
         }
         
-        agents none
+        agent none
 
         stages {
             stage('Build') {
