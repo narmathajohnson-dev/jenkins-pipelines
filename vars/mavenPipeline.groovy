@@ -58,13 +58,14 @@ def call(body) {
     def sonarProjectVersion = config.sonarProjectVersion
     
     String addXmlBindmodule = (
-        jdkVersion.startsWith('openjdk-21') || 
-        jdkVersion.startsWith('openjdk-17' || 
-        jdkVersion.startsWith('openjdk-11' ||
+        jdkVersion.startsWith('openjdk-21') ||
+        jdkVersion.startsWith('openjdk-17') ||
+        jdkVersion.startsWith('openjdk-11') ||
         jdkVersion.startsWith('jdk1.8') ||
         jdkVersion.startsWith('jdk1.7') ||
         jdkVersion.startsWith('jdk1.6')
-    )? '' : '--add-modules java.xml.bind '
+    ) ? '' : '--add-modules java.xml.bind '
+    
     String useConcMarkSweepGC = (
         jdkVersion.startsWith('openjdk-21') || 
         jdkVersion.startsWith('openjdk-17')
