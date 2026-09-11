@@ -86,7 +86,7 @@ def call(body) {
     def dockerProjectRepo = config.dockerProjectRepo
     def dockerProjectRepoBranch = config.dockerProjectRepoBranch ?: 'main'
     def branchNameForDocker = env.GIT_BRANCH
-    def branchIsRelease = branchNameForDocker.equals("trunk") || 
+    def branchIsReleaseable = branchNameForDocker.equals("trunk") || 
                         branchNameForDocker.equals("rel_") || 
                         branchNameForDocker.equals("branches/rel_") ||
                         branchNameForDocker.equals("main") || 
