@@ -119,6 +119,7 @@ def call(body) {
     echo "Sonar: ${sonar}"
     echo "Nexus: ${nexus}"
     echo "Env GIT_BRANCH: ${env.GIT_BRANCH}"
+    echo "Workspace: ${env.WORKSPACE}"
 
     pipeline {
         options {
@@ -161,6 +162,32 @@ def call(body) {
                         checkout scm                        
                     }
 
+                    echo "${autoDeploy != null ? "Auto-deploying to ${autoDeploy}..." : "No auto-deploy specified."}"
+                    echo "containers size: ${containers.size()}"
+                    echo "-branchNameForDocker: ${branchNameForDocker}-"
+                    ech 
+
+                    sh 'mkdir -p $WORKSPACE/tmp-build'
+                    echo 'Created temporary build directory: $WORKSPACE/tmp-build'
+
+                    script {
+                        mvnGoal = 'mvn -B clean install -DskipTests '
+
+                        if (mainBranchFlag || branchIsRelease) {
+                            mvnGoal += 'deploy:deploy ' +
+                            '-DaltDeploymentRepository=snapshot-repo::default::http://172.24.2.167:8081/repository/maven-snapshots/ ' +
+                            '-DdeployAtEnd=true '
+                        }
+                        if(listOfProfiles != null) {
+                            for (profile in listOfProfiles) {
+                                mvnGoal += '-P' + profile + ' '
+                            }
+                        }
+
+                        mvnGoal += enableMavenDownloadMessages
+                    }
+
+                    echo "Maven command: ${mvnGoal}"
                     echo "Building with Maven..."                    
                     // sh 'mvn clean install'
                 }
