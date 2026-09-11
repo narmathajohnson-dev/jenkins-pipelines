@@ -191,8 +191,8 @@ def call(body) {
 
                     echo "Building with Maven..."                    
                     // sh 'mvn clean install'
-                    
-                    echo "Cleaning .repository and .m2 directories..."
+
+                    echo "Cleaning .repository..."
 
                     sh 'mkdir -p .repository'
 
