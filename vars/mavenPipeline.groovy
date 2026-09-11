@@ -42,9 +42,9 @@ def call(body) {
 
         stages {
             stage('BUILD') {
-                agent {
-                    label 'build-agent' // Replace with the label of your build agent
-                }
+                // agent {
+                //     label 'build-agent' // Replace with the label of your build agent
+                // }
                 options {
                     skipDefaultCheckout()
                     timeout(time: 30, unit: 'MINUTES')
