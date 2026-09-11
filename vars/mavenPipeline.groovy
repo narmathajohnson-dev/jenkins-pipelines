@@ -7,12 +7,12 @@ def call(body) {
     all_options = [
         "autoDeploy",
         "attachLogToEmail", 
-        "clearWorkspace"
-        "containers" 
+        "clearWorkspace",
+        "containers" ,
         "dockerArtifactMap",
         "dockerProjectRepo",
         "dockerProjectRepoBranch",
-        "emailRecipients"
+        "emailRecipients",
         "enableMavenDownloadMessages",
         "jdkVersion", 
         "mavenVersion", 
