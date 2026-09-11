@@ -42,9 +42,9 @@ def call(body) {
 
         stages {
             stage('BUILD') {
-                // agent {
-                //     label 'build-agent' // Replace with the label of your build agent
-                // }
+                
+
+
                 options {
                     skipDefaultCheckout()
                     timeout(time: 30, unit: 'MINUTES')
@@ -62,6 +62,7 @@ def call(body) {
                     }
 
                     echo "Building with Maven..."
+                    echo "Env BRANCH_NAME: ${env.GIT_BRANCH}"
                     // sh 'mvn clean install'
                 }
             }
