@@ -189,6 +189,14 @@ def call(body) {
 
                     echo "Maven command: ${mvnGoal}"
 
+                    withMaven(
+                        maven: mavenVersion, 
+                        mavenLocalRepo: '.repository', 
+                        publisherStrategy: 'EXPLICIT',
+                        mavenOpts: '-Xmx3072m ' + useConcMarkSweepGC + ' -Djava.io.tmpdir=$WORKSPACE/tmp-build ') {
+                        sh "${mvnGoal}"
+                    }
+
                     echo "Building with Maven..."                    
                     // sh 'mvn clean install'
 
