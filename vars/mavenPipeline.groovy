@@ -8,7 +8,7 @@ def call(body) {
         "autoDeploy",
         "attachLogToEmail", 
         "clearWorkspace",
-        "containers" ,
+        "containers",
         "dockerArtifactMap",
         "dockerProjectRepo",
         "dockerProjectRepoBranch",
@@ -55,11 +55,59 @@ def call(body) {
     }
 
     def sonarInstance = config.useNewSonar == false? 'Sonar old' : 'Sonar'
-
+    def sonarProjectVersion = config.sonarProjectVersion
+    
     String addXmlBindmodule = (
         jdkVersion.startsWith('openjdk-21') || 
-        jdkVersion.startsWith('openjdk-17')
+        jdkVersion.startsWith('openjdk-17' || 
+        jdkVersion.startsWith('openjdk-11' ||
+        jdkVersion.startsWith('jdk1.8') ||
+        jdkVersion.startsWith('jdk1.7') ||
+        jdkVersion.startsWith('jdk1.6')
     )? '' : '--add-modules java.xml.bind '
+    String useConcMarkSweepGC = (
+        jdkVersion.startsWith('openjdk-21') || 
+        jdkVersion.startsWith('openjdk-17')
+    )? '' : '-XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled'
+    String mavenCodeMetricsOpts = addXmlBindmodule + ' -Xmx3072m ' + useConcMarkSweepGC + ' -Djava.io.tmpdir=$WORKSPACE/tmp-build '
+    String mavenSonarOpts = addXmlBindmodule + ' -Xmx3072m ' + useConcMarkSweepGC + ' -Djava.io.tmpdir=$WORKSPACE/tmp-build '
+    boolean useVerboseVersion = config.useVerbaseVersion == true
+    String autoDeploy = config.autoDeploy ?: null
+    boolean waitForDeploy = config.waitForDeploy == true
+    boolean runIntegrationTests = config.runIntegrationTests == true
+    boolean clearWorkspace = config.clearWorkspace == true
+    boolean skipInitialBuild = config.skipInitialBuild == true
+    String[] branchesToDeployRegExpressions = ['main', 'master', 'release.*', 'truck', 'hotfix.*', 'feature.*', 'bugfix.*', 'support.*']
+    String artifactVersion = ""
+
+    def dockerArtifactMap = config.dockerArtifactMap ?: []
+    def containers = config.containers ?: []
+    def dockerProjectRepo = config.dockerProjectRepo
+    def dockerProjectRepoBranch = config.dockerProjectRepoBranch ?: 'main'
+    def branchNameForDocker = env.GIT_BRANCH
+    def branchIsRelease = branchNameForDocker.equals("trunk") || 
+                        branchNameForDocker.equals("rel_") || 
+                        branchNameForDocker.equals("branches/rel_") ||
+                        branchNameForDocker.equals("main") || 
+                        branchNameForDocker.equals("master") ||
+                        branchNameForDocker.matches("release/")
+    def branchIsRelease = branchNameForDocker.equals("rel_") || 
+                        branchNameForDocker.equals("branches/rel_") || 
+                        branchNameForDocker.equals("release/") ||
+                        branchNameForDocker.equals("release-") 
+    boolean mainBranchFlag = (env.GIT_BRANCH == 'main' || env.GIT_BRANCH == 'master' || env.GIT_BRANCH == 'truck')
+    boolean performReleaseBuild = config.performReleaseBuild == null ? (mainBranchFlag || branchIsRelease) : config.performReleaseBuild
+    def devhubhost = "https://devhub.kumaran.com"
+    def latestTag = branchIsRelease ? "rc" : (branchNameForDocker == "main" || branchNameForDocker == "master" || branchNameForDocker == "trunk") ? "latest" : null
+
+    def dockerArtifactPattern = ""
+    for (dockerArtifact in dockerArtifactMap) {
+        dockerArtifactPattern += ",**/${dockerArtifact['pattern']}"
+    }
+    dockerArtifactPattern = dockerArtifactPattern.length() > 0 ? dockerArtifactPattern.substring(1) : " no files to stash"
+    def disableMavenDownloadMessages = "-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn"
+    def enableMavenDownloadMessages = config.enableMavenDownloadMessages == true ? "" : disableMavenDownloadMessages
+
 
     echo "listOfProfiles: ${listOfProfiles}"
     echo "Maven version: ${mavenVersion}"
