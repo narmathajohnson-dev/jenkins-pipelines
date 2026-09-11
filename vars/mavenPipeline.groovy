@@ -165,8 +165,7 @@ def call(body) {
                     echo "${autoDeploy != null ? "Auto-deploying to ${autoDeploy}..." : "No auto-deploy specified."}"
                     echo "containers size: ${containers.size()}"
                     echo "-branchNameForDocker: ${branchNameForDocker}-"
-                    ech 
-
+                    
                     sh 'mkdir -p $WORKSPACE/tmp-build'
                     echo 'Created temporary build directory: $WORKSPACE/tmp-build'
 
