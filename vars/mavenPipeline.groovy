@@ -12,7 +12,6 @@ def call(body) {
     def attachLogToEmail = config.attachLogToEmail == true
     def sonar = config.sonar == true
     def nexus = config.nexus == true
-    def clearWorkspace = config.clearWorkspace == true
     if (env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'truck' || env.BRANCH_NAME == 'release.*') {
         echo "Sonar and Nexus will be executed for main | master | truck | release.*: ${env.BRANCH_NAME}"
         sonar = true
@@ -28,6 +27,7 @@ def call(body) {
     echo "Sonar: ${sonar}"
     echo "Nexus: ${nexus}"
     echo "Env BRANCH_NAME: ${env.BRANCH_NAME}"
+    echo "Env GIT_BRANCH: ${env.GIT_BRANCH}"
 
     pipeline {
         options {
@@ -62,8 +62,7 @@ def call(body) {
                     //     checkout scm                        
                     // }
 
-                    echo "Building with Maven..."
-                    echo "Env BRANCH_NAME: ${env.GIT_BRANCH}"
+                    echo "Building with Maven..."                    
                     // sh 'mvn clean install'
                 }
             }
