@@ -123,18 +123,26 @@ def call(body) {
     pipeline {
         options {
             timestamps()
-            disableConcurrentBuilds()
-        }
+            buildDiscarder(logRotator(
+                daysToKeepStr: '30', 
+                numToKeepStr: '40', 
+                artifactDaysToKeepStr: '10', 
+                artifactNumToKeepStr: '5'
+            ))
+        }        
         
-        agent any
-
         tools {
             maven 'maven-3.9.9' // Requires configuring 'maven3' in Manage Jenkins -> Tools
         }
 
+        environment {
+            sonarProjectKey = "${env.JOB_NAME}"
+        }
+
+        agent none        
+
         stages {
-            stage('BUILD') {
-                
+            stage('BUILD') {                
 
 
                 options {
@@ -142,16 +150,16 @@ def call(body) {
                     timeout(time: 30, unit: 'MINUTES')
                 }
                 when {
-                    expression { return !config.skipBuild }
+                    expression { skipInitialBuild != true }
                 }
                 steps {
-                    // script {
-                    //     if (clearWorkspace) {
-                    //         echo "Clearing workspace..."
-                    //         deleteDir()
-                    //     }
-                    //     checkout scm                        
-                    // }
+                    script {
+                        if (clearWorkspace) {
+                            echo "Clearing workspace..."
+                            deleteDir()
+                        }
+                        checkout scm                        
+                    }
 
                     echo "Building with Maven..."                    
                     // sh 'mvn clean install'
