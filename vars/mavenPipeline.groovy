@@ -12,6 +12,7 @@ def call(body) {
     def attachLogToEmail = config.attachLogToEmail == true
     def sonar = config.sonar == true
     def nexus = config.nexus == true
+    def clearWorkspace = config.clearWorkspace == true
     if (env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'truck' || env.BRANCH_NAME == 'release.*') {
         echo "Sonar and Nexus will be executed for main | master | truck | release.*: ${env.BRANCH_NAME}"
         sonar = true
@@ -53,13 +54,13 @@ def call(body) {
                     expression { return !config.skipBuild }
                 }
                 steps {
-                    script {
-                        if (clearWorkspace) {
-                            echo "Clearing workspace..."
-                            deleteDir()
-                        }
-                        checkout scm                        
-                    }
+                    // script {
+                    //     if (clearWorkspace) {
+                    //         echo "Clearing workspace..."
+                    //         deleteDir()
+                    //     }
+                    //     checkout scm                        
+                    // }
 
                     echo "Building with Maven..."
                     echo "Env BRANCH_NAME: ${env.GIT_BRANCH}"
