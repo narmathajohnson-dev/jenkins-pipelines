@@ -42,6 +42,9 @@ def call(body) {
 
         stages {
             stage('BUILD') {
+                agent {
+                    label 'build-agent' // Replace with the label of your build agent
+                }
                 options {
                     skipDefaultCheckout()
                     timeout(time: 30, unit: 'MINUTES')
@@ -51,9 +54,15 @@ def call(body) {
                 }
                 steps {
                     script {
-                        echo "Building with Maven..."
-                        sh 'mvn clean install'
+                        if (clearWorkspace) {
+                            echo "Clearing workspace..."
+                            deleteDir()
+                        }
+                        checkout scm                        
                     }
+
+                    echo "Building with Maven..."
+                    // sh 'mvn clean install'
                 }
             }
         }   
