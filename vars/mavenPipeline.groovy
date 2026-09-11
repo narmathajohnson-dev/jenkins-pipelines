@@ -108,7 +108,7 @@ def call(body) {
     dockerArtifactPattern = dockerArtifactPattern.length() > 0 ? dockerArtifactPattern.substring(1) : " no files to stash"
     def disableMavenDownloadMessages = "-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn"
     def enableMavenDownloadMessages = config.enableMavenDownloadMessages == true ? "" : disableMavenDownloadMessages
-
+    def mavenGoal = ""
 
     echo "listOfProfiles: ${listOfProfiles}"
     echo "Maven version: ${mavenVersion}"
@@ -168,7 +168,7 @@ def call(body) {
                     echo "-branchNameForDocker: ${branchNameForDocker}-"
                     
                     sh 'mkdir -p $WORKSPACE/tmp-build'
-                    echo 'Created temporary build directory: $WORKSPACE/tmp-build'
+                    echo 'Created temporary build directory: ${env.WORKSPACE}/tmp-build'
 
                     script {
                         mvnGoal = 'mvn -B clean install -DskipTests '
