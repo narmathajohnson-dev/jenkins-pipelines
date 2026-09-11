@@ -188,8 +188,17 @@ def call(body) {
                     }
 
                     echo "Maven command: ${mvnGoal}"
+
                     echo "Building with Maven..."                    
                     // sh 'mvn clean install'
+                    
+                    echo "Cleaning .repository and .m2 directories..."
+
+                    sh 'mkdir -p .repository'
+
+                    dir('.repository') {
+                        deleteDir()
+                    }
                 }
             }
         }   
