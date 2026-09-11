@@ -143,7 +143,8 @@ def call(body) {
         agent none        
 
         stages {
-            stage('BUILD') {                
+            stage('BUILD') {
+                agent any
 
 
                 options {
