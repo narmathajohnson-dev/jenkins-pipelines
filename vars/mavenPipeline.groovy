@@ -160,7 +160,7 @@ def call(body) {
                             echo "Clearing workspace..."
                             deleteDir()
                         }
-                        // checkout scm                        
+                        checkout scm                        
                     }
 
                     echo "${autoDeploy != null ? "Auto-deploying to ${autoDeploy}..." : "No auto-deploy specified."}"
