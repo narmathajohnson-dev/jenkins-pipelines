@@ -190,13 +190,11 @@ def call(body) {
                     
 
                     script {
-                        def runtimeMavenOpts = "-Xmx3072m ${useConcMarkSweepGC} -Djava.io.tmpdir='${env.WORKSPACE}/tmp-build'"
-                        echo "Runtime Maven options: ${runtimeMavenOpts}"
                         withMaven(
                             maven: mavenVersion,
                             mavenLocalRepo: '.repository',
                             publisherStrategy: 'EXPLICIT',
-                            mavenOpts: runtimeMavenOpts) {
+                            mavenOpts: "-Xmx3072m ${useConcMarkSweepGC} -Djava.io.tmpdir='${env.WORKSPACE}/tmp-build'") {
                                 echo "Building with Maven..."
                                 sh """
                                 ${mvnGoal}
