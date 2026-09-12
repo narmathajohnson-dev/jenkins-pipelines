@@ -70,8 +70,8 @@ def call(body) {
         jdkVersion.startsWith('openjdk-21') || 
         jdkVersion.startsWith('openjdk-17')
     )? '' : '-XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled'
-    String mavenCodeMetricsOpts = addXmlBindmodule + ' -Xmx3072m ' + useConcMarkSweepGC + ' -Djava.io.tmpdir=$WORKSPACE/tmp-build '
-    String mavenSonarOpts = addXmlBindmodule + ' -Xmx3072m ' + useConcMarkSweepGC + ' -Djava.io.tmpdir=$WORKSPACE/tmp-build '
+    String mavenCodeMetricsOpts = addXmlBindmodule + " -Xmx3072m ${useConcMarkSweepGC} -Djava.io.tmpdir=${env.WORKSPACE}/tmp-build "
+    String mavenSonarOpts = addXmlBindmodule + " -Xmx3072m ${useConcMarkSweepGC} -Djava.io.tmpdir=${env.WORKSPACE}/tmp-build "
     boolean useVerboseVersion = config.useVerbaseVersion == true
     String autoDeploy = config.autoDeploy ?: null
     boolean waitForDeploy = config.waitForDeploy == true
@@ -108,8 +108,7 @@ def call(body) {
     dockerArtifactPattern = dockerArtifactPattern.length() > 0 ? dockerArtifactPattern.substring(1) : " no files to stash"
     def disableMavenDownloadMessages = "-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn"
     def enableMavenDownloadMessages = config.enableMavenDownloadMessages == true ? "" : disableMavenDownloadMessages
-    def mavenGoal = ""
-
+    
     echo "listOfProfiles: ${listOfProfiles}"
     echo "Maven version: ${mavenVersion}"
     echo "Node.js version: ${nodeJsVersion}"
@@ -167,11 +166,11 @@ def call(body) {
                     echo "containers size: ${containers.size()}"
                     echo "-branchNameForDocker: ${branchNameForDocker}-"
                     
-                    sh 'mkdir -p $WORKSPACE/tmp-build'
-                    echo 'Created temporary build directory: ${env.WORKSPACE}/tmp-build'
+                    sh "mkdir -p ${env.WORKSPACE}/tmp-build"
+                    echo "Created temporary build directory: ${env.WORKSPACE}/tmp-build"
 
                     script {
-                        mvnGoal = 'mvn -B clean install -DskipTests '
+                        def mvnGoal = 'mvn -B clean install -DskipTests '
 
                         if (mainBranchFlag || branchIsRelease) {
                             mvnGoal += 'deploy:deploy ' +
@@ -185,20 +184,21 @@ def call(body) {
                         }
 
                         mvnGoal += enableMavenDownloadMessages
+                        echo "Maven command: ${mvnGoal}"
                     }
+                    
 
-                    echo "Maven command: ${mvnGoal}"
-
-                    withMaven(
-                        maven: mavenVersion, 
-                        mavenLocalRepo: '.repository', 
-                        publisherStrategy: 'EXPLICIT',
-                        mavenOpts: '-Xmx3072m ' + useConcMarkSweepGC + ' -Djava.io.tmpdir=$WORKSPACE/tmp-build ') {
-                        sh "${mvnGoal}"
+                    script {
+                        def runtimeMavenOpts = "-Xmx3072m ${useConcMarkSweepGC} -Djava.io.tmpdir=${env.WORKSPACE}/tmp-build"
+                        withMaven(
+                            maven: mavenVersion,
+                            mavenLocalRepo: '.repository',
+                            publisherStrategy: 'EXPLICIT',
+                            mavenOpts: runtimeMavenOpts) {
+                                echo "Building with Maven..."
+                                sh "${mvnGoal}"
+                        }
                     }
-
-                    echo "Building with Maven..."                    
-                    // sh 'mvn clean install'
 
                     echo "Cleaning .repository..."
 
