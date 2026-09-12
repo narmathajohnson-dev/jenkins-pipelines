@@ -70,8 +70,8 @@ def call(body) {
         jdkVersion.startsWith('openjdk-21') || 
         jdkVersion.startsWith('openjdk-17')
     )? '' : '-XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled'
-    String mavenCodeMetricsOpts = addXmlBindmodule + " -Xmx3072m ${useConcMarkSweepGC} -Djava.io.tmpdir=${env.WORKSPACE}/tmp-build "
-    String mavenSonarOpts = addXmlBindmodule + " -Xmx3072m ${useConcMarkSweepGC} -Djava.io.tmpdir=${env.WORKSPACE}/tmp-build "
+    String mavenCodeMetricsOpts = addXmlBindmodule + " -Xmx3072m ${useConcMarkSweepGC} -Djava.io.tmpdir=\"${env.WORKSPACE}/tmp-build\" "
+    String mavenSonarOpts = addXmlBindmodule + " -Xmx3072m ${useConcMarkSweepGC} -Djava.io.tmpdir=\"${env.WORKSPACE}/tmp-build\" "
     boolean useVerboseVersion = config.useVerbaseVersion == true
     String autoDeploy = config.autoDeploy ?: null
     boolean waitForDeploy = config.waitForDeploy == true
@@ -190,7 +190,7 @@ def call(body) {
                     
 
                     script {
-                        def runtimeMavenOpts = "-Xmx3072m ${useConcMarkSweepGC} -Djava.io.tmpdir=${env.WORKSPACE}/tmp-build"
+                        def runtimeMavenOpts = "-Xmx3072m ${useConcMarkSweepGC} -Djava.io.tmpdir=\"${env.WORKSPACE}/tmp-build\""
                         withMaven(
                             maven: mavenVersion,
                             mavenLocalRepo: '.repository',
