@@ -167,8 +167,8 @@ def call(body) {
                     echo "containers size: ${containers.size()}"
                     echo "-branchNameForDocker: ${branchNameForDocker}-"
                     
-                    sh "mkdir -p '${env.WORKSPACE}'/tmp-build"
-                    echo "Created temporary build directory: '${env.WORKSPACE}'/tmp-build"
+                    sh "mkdir -p '${env.WORKSPACE}/tmp-build'"
+                    echo "Created temporary build directory: '${env.WORKSPACE}/tmp-build'"
 
                     script {
                         mvnGoal = 'mvn -B clean install -DskipTests '
@@ -190,7 +190,8 @@ def call(body) {
                     
 
                     script {
-                        def runtimeMavenOpts = "-Xmx3072m ${useConcMarkSweepGC} -Djava.io.tmpdir='${env.WORKSPACE}'/tmp-build"
+                        def runtimeMavenOpts = "-Xmx3072m ${useConcMarkSweepGC} -Djava.io.tmpdir='${env.WORKSPACE}/tmp-build'"
+                        echo "Runtime Maven options: ${runtimeMavenOpts}"
                         withMaven(
                             maven: mavenVersion,
                             mavenLocalRepo: '.repository',
