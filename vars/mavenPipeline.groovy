@@ -109,7 +109,7 @@ def call(body) {
     def disableMavenDownloadMessages = "-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn"
     def enableMavenDownloadMessages = config.enableMavenDownloadMessages == true ? "" : disableMavenDownloadMessages
     def mvnGoal = ""
-    
+
     echo "listOfProfiles: ${listOfProfiles}"
     echo "Maven version: ${mavenVersion}"
     echo "Node.js version: ${nodeJsVersion}"
@@ -197,7 +197,10 @@ def call(body) {
                             publisherStrategy: 'EXPLICIT',
                             mavenOpts: runtimeMavenOpts) {
                                 echo "Building with Maven..."
-                                sh "${mvnGoal}"
+                                sh """
+                                unset JAVA_TOOL_OPTIONS
+                                ${mvnGoal}
+                                """
                         }
                     }
 
