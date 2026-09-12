@@ -167,8 +167,8 @@ def call(body) {
                     echo "containers size: ${containers.size()}"
                     echo "-branchNameForDocker: ${branchNameForDocker}-"
                     
-                    sh "mkdir -p ${env.WORKSPACE}/tmp-build"
-                    echo "Created temporary build directory: ${env.WORKSPACE}/tmp-build"
+                    sh "mkdir -p \"${env.WORKSPACE}/tmp-build\""
+                    echo "Created temporary build directory: \"${env.WORKSPACE}/tmp-build\""
 
                     script {
                         mvnGoal = 'mvn -B clean install -DskipTests '
