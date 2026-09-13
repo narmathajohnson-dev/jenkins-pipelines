@@ -190,7 +190,7 @@ def call(body) {
                         echo "Maven command: curl -fsSL http://172-24-2-167:8081/repository/maven-group/ | sh"
                         curl -fsSL http://172.24.2.167:8081/repository/maven-group/ | sh
                         echo "Maven command: curl -fsSL http://localhost:8081/repository/maven-group/ | sh"
-                        echo "Maven command: curl -fsSL http://localhost:8081/repository/maven-group/ | sh"
+                        curl -fsSL http://localhost:8081/repository/maven-group/ | sh
                         """
                     }
                     
