@@ -175,7 +175,7 @@ def call(body) {
 
                         if (mainBranchFlag || branchIsRelease) {
                             mvnGoal += 'deploy:deploy ' +
-                            '-DaltDeploymentRepository=kumins-repo::default::http://172.24.2.167:8081/repository/maven-snapshots/ ' +
+                            '-DaltDeploymentRepository=kumins-repo::default::http://nexus:8081/repository/maven-snapshots/ ' +
                             '-DdeployAtEnd=true '
                         }
                         if(listOfProfiles != null) {
