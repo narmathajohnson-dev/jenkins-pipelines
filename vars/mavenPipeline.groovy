@@ -192,7 +192,7 @@ def call(body) {
                     script {
                         withMaven(
                             maven: mavenVersion,
-                            mavenSettingsConfig: 'maven-settings-xml',
+                            mavenSettingsConfig: '73e52279-77e6-41ee-ba25-efb0421b0042',
                             mavenLocalRepo: '.repository',
                             publisherStrategy: 'EXPLICIT',
                             mavenOpts: "-Xmx3072m ${useConcMarkSweepGC} -Djava.io.tmpdir='${env.WORKSPACE}/tmp-build'") {
