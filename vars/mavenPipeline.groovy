@@ -5,7 +5,7 @@ def call(body) {
     body()
 
     all_options = [
-        "autoDeploy",
+        "autoDeployJob",
         "attachLogToEmail", 
         "clearWorkspace",
         "containers",
@@ -73,7 +73,7 @@ def call(body) {
     String mavenCodeMetricsOpts = addXmlBindmodule + " -Xmx3072m ${useConcMarkSweepGC} -Djava.io.tmpdir=\"${env.WORKSPACE}/tmp-build\" "
     String mavenSonarOpts = addXmlBindmodule + " -Xmx3072m ${useConcMarkSweepGC} -Djava.io.tmpdir=\"${env.WORKSPACE}/tmp-build\" "
     boolean useVerboseVersion = config.useVerbaseVersion == true
-    String autoDeploy = config.autoDeploy ?: null
+    String autoDeployJob = config.autoDeployJob ?: null
     boolean waitForDeploy = config.waitForDeploy == true
     boolean runIntegrationTests = config.runIntegrationTests == true
     boolean clearWorkspace = config.clearWorkspace == true
@@ -106,8 +106,11 @@ def call(body) {
         dockerArtifactPattern += ",**/${dockerArtifact['pattern']}"
     }
     dockerArtifactPattern = dockerArtifactPattern.length() > 0 ? dockerArtifactPattern.substring(1) : " no files to stash"
+    def branchName = null
+
     def disableMavenDownloadMessages = "-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn"
     def enableMavenDownloadMessages = config.enableMavenDownloadMessages == true ? "" : disableMavenDownloadMessages
+    
     def mvnGoal = ""
 
     echo "listOfProfiles: ${listOfProfiles}"
@@ -118,8 +121,8 @@ def call(body) {
     echo "Attach log to email: ${attachLogToEmail}"
     echo "Sonar: ${sonar}"
     echo "Nexus: ${nexus}"
-    echo "Env GIT_BRANCH: ${env.GIT_BRANCH}"
-    echo "Workspace: ${env.WORKSPACE}"
+    echo "Workspace: ${env.WORKSPACE}, JOB_NAME: ${env.JOB_NAME}, GIT_BRANCH: ${env.GIT_BRANCH}"   
+    
 
     pipeline {
         options {
@@ -133,7 +136,7 @@ def call(body) {
         }        
         
         tools {
-            maven 'maven-3.9.9' // Requires configuring 'maven3' in Manage Jenkins -> Tools
+            maven mavenVersion // Requires configuring 'maven3' in Manage Jenkins -> Tools
         }
 
         environment {
@@ -145,8 +148,6 @@ def call(body) {
         stages {
             stage('BUILD') {
                 agent any
-
-
                 options {
                     skipDefaultCheckout()
                     timeout(time: 30, unit: 'MINUTES')
@@ -163,7 +164,7 @@ def call(body) {
                         checkout scm                        
                     }
 
-                    echo "${autoDeploy != null ? "Auto-deploying to ${autoDeploy}..." : "No auto-deploy specified."}"
+                    echo "${autoDeployJob != null ? "Auto-deploying to ${autoDeployJob}..." : "No auto-deploy specified."}"
                     echo "containers size: ${containers.size()}"
                     echo "-branchNameForDocker: ${branchNameForDocker}-"
                     
@@ -175,7 +176,7 @@ def call(body) {
 
                         if (mainBranchFlag || branchIsRelease) {
                             mvnGoal += 'deploy:deploy ' +
-                            '-DaltDeploymentRepository=kumins-repo::default::http://nexus:8081/repository/maven-snapshots/ ' +
+                            '-DaltDeploymentRepository=kumins-repo::http://nexus:8081/repository/maven-snapshots/ ' +
                             '-DdeployAtEnd=true '
                         }
                         if(listOfProfiles != null) {
@@ -186,29 +187,47 @@ def call(body) {
 
                         mvnGoal += enableMavenDownloadMessages
                         echo "Maven command: ${mvnGoal}"                       
-                    }
-                    
+                    }                    
 
-                    script {
-                        withMaven(
-                            maven: mavenVersion,
-                            mavenSettingsConfig: '73e52279-77e6-41ee-ba25-efb0421b0042',
-                            mavenLocalRepo: '.repository',
-                            publisherStrategy: 'EXPLICIT',
-                            mavenOpts: "-Xmx3072m ${useConcMarkSweepGC} -Djava.io.tmpdir='${env.WORKSPACE}/tmp-build'") {
-                                echo "Building with Maven..."
-                                sh """
-                                ${mvnGoal}
-                                """
-                        }
+                    withMaven(
+                        maven: mavenVersion,
+                        mavenSettingsConfig: '73e52279-77e6-41ee-ba25-efb0421b0042',
+                        mavenLocalRepo: '.repository',
+                        publisherStrategy: 'EXPLICIT',
+                        mavenOpts: "-Xmx3072m ${useConcMarkSweepGC} -Djava.io.tmpdir='${env.WORKSPACE}/tmp-build'") {
+                            echo "Building with Maven..."
+                            sh """
+                            ${mvnGoal}
+                            """
                     }
 
-                    echo "Cleaning .repository..."
+                    echo "Cleaning .repository directory..."
 
                     sh 'mkdir -p .repository'
 
                     dir('.repository') {
                         deleteDir()
+                    }
+                }
+                post {
+                    success {
+                        echo "Cleaning up temporary build directory..."
+                        cleanWs(deleteDirs: true, disableDeferredWipeout: true)
+                        echo "Temporary build directory cleaned."  
+                    }
+                }
+            }
+            stage('AUTO DEPLOY') {
+                when {
+                    expression { autoDeployJob && containers.size() == 0 }
+                    expression { skipInitialBuild != true }
+                }
+                steps {
+                    script {
+                        // lock(resource: "auto-deploy-${autoDeployJob}", inversePrecedence: true) {
+                            echo "Auto-deploying to ${autoDeployJob}..."
+                            // build job: autoDeployJob, wait: waitForDeploy
+                        // }
                     }
                 }
             }
