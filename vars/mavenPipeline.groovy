@@ -167,6 +167,7 @@ def call(body) {
                     echo "${autoDeployJob != null ? "Auto-deploying to ${autoDeployJob}..." : "No auto-deploy specified."}"
                     echo "containers size: ${containers.size()}"
                     echo "-branchNameForDocker: ${branchNameForDocker}-"
+                    echo "Env WORKSPACE: ${env.WORKSPACE}"
                     
                     sh "mkdir -p '${env.WORKSPACE}/tmp-build'"
                     echo "Created temporary build directory: '${env.WORKSPACE}/tmp-build'"
@@ -223,11 +224,9 @@ def call(body) {
                     expression { skipInitialBuild != true }
                 }
                 steps {
-                    script {
-                        // lock(resource: "auto-deploy-${autoDeployJob}", inversePrecedence: true) {
-                            echo "Auto-deploying to ${autoDeployJob}..."
-                            // build job: autoDeployJob, wait: waitForDeploy
-                        // }
+                    lock(resource: "${env.JOB_NAME}-CODE-METRICS") {
+                        echo "Auto-deploying to ${autoDeployJob}..."
+                        build job: autoDeployJob, wait: waitForDeploy
                     }
                 }
             }
