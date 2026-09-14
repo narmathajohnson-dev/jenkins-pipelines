@@ -224,7 +224,7 @@ def call(body) {
                     expression { skipInitialBuild != true }
                 }
                 steps {
-                    lock(resource: "${env.JOB_NAME}-CODE-METRICS") {
+                    lock("${env.JOB_NAME}-CODE-METRICS") {
                         echo "Auto-deploying to ${autoDeployJob}..."
                         build job: autoDeployJob, wait: waitForDeploy
                     }
